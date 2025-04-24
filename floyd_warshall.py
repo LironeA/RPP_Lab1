@@ -4,7 +4,8 @@ import argparse
 import numpy as np
 import time
 import numba
-from numba import jit, prange, njit
+import ctypes
+import os
 
 
 def load_graph_from_json(filename):
@@ -13,8 +14,12 @@ def load_graph_from_json(filename):
         graph_data = json.load(f)
     return graph_data
 
+path = os.path.abspath("floyd_warshall_omp.dll")
+lib = ctypes.CDLL(path)
 
-@njit(parallel=True, fastmath=True)
+# Визначення типів аргументів
+lib.floyd_warshall_omp.argtypes = [ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+
 def floyd_warshall_openmp(adjacency_matrix, num_nodes):
     """
     Реалізація алгоритму Флойда-Варшалла з використанням OpenMP (через Numba parallel)
@@ -26,25 +31,11 @@ def floyd_warshall_openmp(adjacency_matrix, num_nodes):
     Returns:
         distances: Матриця найкоротших шляхів між усіма парами вершин
     """
-    dist = adjacency_matrix.copy()
 
-    for k in range(num_nodes):
-        row_k = dist[k]
-
-        # Розпаралелюємо зовнішній цикл
-        for i in prange(num_nodes):
-            dist_i = dist[i]
-            dik = dist_i[k]
-            if dik == np.inf:
-                continue
-            for j in range(num_nodes):
-                dkj = row_k[j]
-                if dkj == np.inf:
-                    continue
-                new_dist = dik + dkj
-                if new_dist < dist_i[j]:
-                    dist_i[j] = new_dist
-
+    n = adjacency_matrix.shape[0]
+    dist = adjacency_matrix.copy().astype(np.float64)
+    ptr = dist.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    lib.floyd_warshall_omp(ptr, n)
     return dist
 
 

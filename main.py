@@ -46,7 +46,7 @@ def process_algorithm(algorithm, input_path, start, end, use_sequential, use_mpi
     else:
         raise ValueError(f"Невідомий алгоритм: {algorithm}")
 
-
+#[Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("windows-1251")
 def main():
     parser = argparse.ArgumentParser(description='Паралельні алгоритми на графах')
     parser.add_argument('--algorithm', type=str, required=True,
@@ -85,7 +85,7 @@ def main():
             full_path = os.path.join(args.input, filename)
             for alg in algorithms:
                 if rank == 0:
-                    print(f"\n[{datetime.now()}] ▶️ Старт обробки: {filename}, алгоритм: {alg}")
+                    print(f"\n[{datetime.now()}] Старт обробки: {filename}, алгоритм: {alg}")
                     print(f"Алгоритм: {alg} | Sequential: {args.sequential} | MPI: {args.mpi} | OpenMP: {args.openmp}")
                 try:
                     results = process_algorithm(alg, full_path, args.start, args.end, args.sequential, args.mpi,
@@ -118,10 +118,10 @@ def main():
                                 json.dump(results, f, indent=2, default=convert_to_python_type)
                             print(f"-> Результат збережено у {output_path}")
                     if rank == 0:
-                        print(f"[{datetime.now()}] ✅ Завершено: {filename}, алгоритм: {alg}")
+                        print(f"[{datetime.now()}] Завершено: {filename}, алгоритм: {alg}")
                 except Exception as e:
                     if rank == 0:
-                        print(f"[{datetime.now()}] ❌ Помилка у {filename} з алгоритмом {alg}: {e}")
+                        print(f"[{datetime.now()}] Помилка у {filename} з алгоритмом {alg}: {e}")
                         import traceback
                         traceback.print_exc()
     else:

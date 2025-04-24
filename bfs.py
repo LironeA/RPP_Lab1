@@ -8,7 +8,7 @@ import numba
 from numba import jit, prange
 import sys
 
-#[Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("windows-1251")
+
 
 
 def load_graph_from_json(filename):
